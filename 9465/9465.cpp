@@ -27,13 +27,12 @@ int main()
 				result[i].PB(input);
 			}
 		}
-		for(int i=0;i<2*(n-1);i++){
-			int row = i%2;
-			int col = i/2;
-			
-			result[1-row][col+1] = max(result[1-row][col+1], result[row][col] + sticker[1-row][col+1]);
-			if(col < n-2)
-				result[1-row][col+2] = max(result[1-row][col+2], result[row][col] + sticker[1-row][col+2]);
+		for(int i=0;i<n-1;i++){
+			for(int j=0;j<2;j++){
+				result[1-j][i+1] = max(result[1-j][i+1], result[j][i] + sticker[1-j][i+1]);
+				if(i < n-2)
+					result[1-j][i+2] = max(result[1-j][i+2], result[j][i] + sticker[1-j][i+2]);
+			}
 		}
 
 		cout << max(result[0][n-1], result[1][n-1]) << endl;
