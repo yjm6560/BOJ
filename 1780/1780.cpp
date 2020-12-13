@@ -7,6 +7,7 @@ int N;
 int pcount = 0;
 int zcount = 0;
 int mcount = 0;
+
 void funct(int x, int y, int phase){
     int standard = arr[x][y];
     for(int i=x;i<x+phase;i++){
