@@ -1,55 +1,50 @@
 /*
-	자동차 공장
-	BFS,DFS
+	시간 초과
 */
 #include <iostream>
-#include <algorithm>
-#include <string.h>
 #include <vector>
+#include <algorithm>
+
+#define MAX_EMPLOYEE 500000
 
 using namespace std;
 
-char cmd;
-int N, M, parent, a, x, pay[500001], diff[500001];
-vector<vector<int>> relation;
-bool updated = false;
-
-int dfs(int a){
-	int ret = 0;
-	for(auto c : relation[a]){
-		ret += dfs(c) + diff[c];
-	}
-	pay[a] += ret;
-	return ret;
-}
+vector<int> emp(MAX_EMPLOYEE+1, 0);
+vector<int> sal(MAX_EMPLOYEE+1, 0);
+vector<int> gap(MAX_EMPLOYEE+1, 0);
 
 int main()
 {
 	ios::sync_with_stdio(0);
 	cin.tie(0);
+	cout.tie(0);
 
+	int N, M, a, x;
+	char cmd;
+	bool updated = false;
 	cin >> N >> M;
-	cin >> pay[1];
-	for(int i=0;i<=N;i++){
-		vector<int> child;
-		relation.push_back(child);
-	}
-	for(int i=2;i<=N;i++){
-		cin >> pay[i] >> parent;
-		relation[i].push_back(parent);
-	}
+
+	cin >> sal[1];
+
+	for(int i=2;i<=N;i++)
+		cin >> sal[i] >> emp[i];
+	
 	for(int i=0;i<M;i++){
 		cin >> cmd;
 		if(cmd == 'p'){
 			cin >> a >> x;
-			diff[a] +=x;
-			updated = true;
-		} else if(cmd == 'u'){
+			gap[a] += x;
+		} else {
 			cin >> a;
-			cout << pay[a] + (updated? dfs(a) : 0) << "\n";
-			if(updated)
-				memset(diff, 0, sizeof(diff));
-			updated = false;
+			int answer = sal[a];
+			int parent = emp[a];
+			while(parent){
+				answer += gap[parent];
+				parent = emp[parent];
+			}
+			cout << answer << "\n";
 		}
 	}
+	
+	return 0;
 }
