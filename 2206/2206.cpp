@@ -4,66 +4,61 @@
 */
 
 #include <iostream>
-#include <stack>
-#include <string.h>
-#include <limits.h>
+#include <vector>
 #include <algorithm>
+#include <queue>
+#include <tuple>
 
 using namespace std;
-
-#define F first
-#define S second
-#define is_broken(pos) (pos.F != -1 || pos.S != -1)
-#define MAX_VAL INT_MAX
-
-int N, M, dist[1001][1001][2], wall[1001][1001];
-
-void movewall(int x, int y, int broken, int val){
-//	cout << "(" << x << ", " << y << ") " << wall[x][y] << " : " << broken << " dist : " << dist[x][y] << " ";
-	if(wall[x][y] && broken){
-//		cout << "wall[x][y] && broken\n";
-		return;
-	}
-	dist[x][y][broken] = val;
-//	cout << "PASS\n";
-	if((x>1 && dist[x-1][y][broken] > dist[x][y][broken]+1) && broken+wall[x-1][y] < 2){
-		movewall(x-1, y, broken+wall[x][y], dist[x][y][broken]+1);
-	}
-	if((x<N && dist[x+1][y][broken] > dist[x][y][broken]+1) && broken+wall[x+1][y] < 2){
-		movewall(x+1, y, broken + wall[x][y], dist[x][y][broken]+1);
-	}
-	if((y>1 && dist[x][y-1][broken] > dist[x][y][broken]+1) && broken+wall[x][y-1] < 2){
-		movewall(x, y-1, broken + wall[x][y], dist[x][y][broken]+1);
-	}
-	if((y<M && dist[x][y+1][broken] > dist[x][y][broken]+1) && broken+wall[x][y+1] < 2){
-		movewall(x, y+1, broken + wall[x][y], dist[x][y][broken]+1);
-	}
-}
 
 int main()
 {
 	ios::sync_with_stdio(0);
 	cin.tie(0);
-
+	cout.tie(0);
+	
+	vector<int> dx = {-1, 1, 0, 0};
+	vector<int> dy = {0, 0, -1, 1};
+	
+	int N, M, answer = -1;
 	cin >> N >> M;
-	char c;
-	for(int i=1;i<=N;i++){
-		for(int j=1;j<=M;j++){
-			cin >> c;
-			wall[i][j] = c-'0';
-			dist[i][j][0] = MAX_VAL;
-			dist[i][j][1] = MAX_VAL;
+	vector<vector<char>> road(N+1, vector<char>(M+1));
+	vector<vector<vector<int>>> dp(2, vector<vector<int>>(N+1, vector<int>(M+1, 0)));
+	queue<tuple<int, int, bool>> q;
+
+	for(int i=1;i<=N;i++)
+		for(int j=1;j<=M;j++)
+			cin >> road[i][j];
+	
+	dp[0][1][1] = 1;
+
+	q.push({1, 1, 0});
+
+	while(!q.empty()){
+		int x = get<0>(q.front());
+		int y = get<1>(q.front());
+		int wall = get<2>(q.front());
+		q.pop();
+		if(x==N && y==M){
+			answer = dp[wall][x][y];
+			break;
+		}
+		for(int d=0;d<4;d++){
+			int nx = x + dx[d];
+			int ny = y + dy[d];
+			if(nx<1 || nx>N || ny<1 || ny>M)
+				continue;
+			if(road[nx][ny]=='0' && dp[wall][nx][ny]==0){
+				dp[wall][nx][ny] = dp[wall][x][y] + 1;
+				q.push({nx, ny, wall});
+			} else if(wall==0 && road[nx][ny]=='1' && dp[0][nx][ny]==0){
+				dp[1][nx][ny] = dp[wall][x][y] + 1;
+				q.push({nx, ny, 1});
+			}
 		}
 	}
-	movewall(1,1,0,1);
-	cout << ((min(dist[N][M][0], dist[N][M][1])==MAX_VAL)? -1:min(dist[N][M][0], dist[N][M][1])) << endl;
-/*
-	for(int i=1;i<=N;i++){
-		for(int j=1;j<=M;j++){
-			cout << wall[i][j] << " ";
-//			cout << (dist[i][j]==MAX_VAL? -1:dist[i][j]) << " ";
-		}
-		cout << endl;
-	}
-*/
+	
+	cout << answer << "\n";
+
+	return 0;
 }
