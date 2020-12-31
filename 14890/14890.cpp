@@ -4,27 +4,16 @@
 
 using namespace std;
 
-bool bridgeCheck(vector<int> road, int s, int length){
-	if(s+length >= road.size())
+bool isBridgePossible(vector<int> road, int idx, int L, int N){
+	if(idx + L > N)
 		return false;
-	for(int i=s+1;i<s+length;i++)
-		if(road[i] != road[i-1])
+	for(int i=idx+1;i<idx+L+1;i++){
+		if(road[idx+1] != road[i])
 			return false;
+	}
 	return true;
 }
 
-bool isStraight(vector<int> road){
-	for(int i=1;i<road.size();i++)
-		if(road[i] != road[i-1])
-			return false;
-	return true;
-}
-bool isGapOver(vector<int> road){
-	for(int i=1;i<road.size();i++)
-		if(abs(road[i]-road[i-1]) > 1)
-			return false;
-	return true;
-}
 int main()
 {
 	ios::sync_with_stdio(0);
@@ -33,51 +22,54 @@ int main()
 
 	int N, L, answer = 0;
 	cin >> N >> L;
-	vector<vector<int>> road(N, vector<int>(N));
-	vector<bool> rows(N, true);
-	vector<bool> cols(N, true);
-
-	for(int i=0;i<N;i++)
-		for(int j=0;j<N;j++)
+	vector<vector<int>> road(N*2, vector<int>(N));
+	for(int i=0;i<N;i++){
+		for(int j=0;j<N;j++){
 			cin >> road[i][j];
-	
-	for(int r=0;r<N;r++){
-		/*
-		1. 높이 비교
-		2-1. 차이 안 나면 continue
-		2-2. 1 넘게 차이나면 false
-		2-3. 1 차이나면 다음 L만큼 높이 비교
-		3-1. L만큼 못 가면(중간에 높이 변경, 길이 짧음) false
-		3-2. L만큼 가면 c 업데이트
-		*/
-		if(isStraight(road[r]))
-			continue;
-		if(!isGapOver(road[r])){
-			rows[r] = false;
-			continue;
-		}
-		vector<bool> check(N, false);
-		for(int c=1;c<N;c++){
-			if(road[r][c] == road[r][c-1] + 1){
-				if(c+L > N || check[c]){
-					rows[r] = false;
-					break;
-				}
-				if(!isBridge(road[r], c, L)){
-					rows[r] = false;
-					break;
-				}
-				for(int i=c;i<c+L;i++){
-					check[c] = true;
-				}
-				c += L - 1;
-			}
+			road[N+j][i] = road[i][j];
 		}
 	}
-	for(int i=0;i<N;i++)
-		if(rows[i])
+	/*
+	for(int i=0;i<2*N;i++)
+		for(int j=0;j<N;j++)
+			cout << i << ", " << j << " : " << road[i][j] << endl;
+	*/
+	for(int i=0;i<2*N;i++){
+		bool check = true;
+		int bef = 1;
+		cout << i << " : ";
+		for(int j=0;j<N-1;j++){
+			if(road[i][j] == road[i][j + 1]){
+				bef++;
+			} else if(road[i][j] == road[i][j + 1] + 1){
+				if(isBridgePossible(road[i], j, L, N)){
+					j += L - 1;
+					bef = 0;
+				} else {
+					cout << "down false" << j;
+					check = false;
+					break;
+				}
+			} else if(road[i][j] + 1 == road[i][j + 1]){
+				if(bef >= L){
+					bef = 1;
+				} else {
+					cout << "up false";
+					check = false;
+					break;
+				}
+			} else {
+				cout << "gap false";
+				check = false;
+				break;
+			}
+		}
+		cout << endl;
+		if(check){
 			cout << i << endl;
-			
-
+			answer++;
+		}
+	}
+	cout << answer << endl;
 	return 0;
 }
