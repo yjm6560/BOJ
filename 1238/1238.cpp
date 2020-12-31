@@ -9,6 +9,32 @@
 
 using namespace std;
 
+vector<int> solve(int N, int X, vector<vector<int>> adj){
+	vector<int> dist(N+1, MAXCOST);
+	vector<bool> visited(N+1, false);
+	priority_queue<pair<int, int>> pq;
+	
+	dist[X] = 0;
+	pq.push({0, X});
+
+	while(!pq.empty()){
+		int a = pq.top().second;
+		pq.pop();
+		if(visited[a])
+			continue;
+		visited[a] = true;
+		for(int i=1;i<=N;i++){
+			if(adj[a][i] == 0)
+				continue;
+			if(dist[a] + adj[a][i] < dist[i]){
+				dist[i] = dist[a] + adj[a][i];
+				pq.push({-dist[i], i});
+			}
+		}
+	}
+	return dist;
+}
+
 int main(){
 	ios::sync_with_stdio(0);
 	cin.tie(0);
@@ -18,27 +44,22 @@ int main(){
 	int s, e, cost;
 	int answer = 0;
 	cin >> N >> M >> X;
-
-	vector<vector<int>> town(N+1, vector<int>(N+1, MAXCOST));
-	vector<tuple<int, int, int>> dist;
-
+	
+	vector<vector<int>> adjToX(N+1, vector<int>(N+1, 0));
+	vector<vector<int>> adjFromX(N+1, vector<int>(N+1, 0));
 	for(int i=1;i<=M;i++){
 		cin >> s >> e >> cost;
-		dist.push_back({s, e, cost});
+		adjToX[s][e] = cost;
+		adjFromX[e][s] = cost;
 	}
-	for(int i=1;i<=N;i++){
-		town[i][i] = 0;
-		for(auto e : dist){
-			town[i][get<1>(e)] = min(town[i][get<1>(e)], town[i][get<0>(e)] + get<2>(e));
-		}
-	}
-
-	for(int i=1;i<=N;i++){
-		for(int j=1;j<=N;j++){
-			cout << (town[i][j] == MAXCOST? 0 : town[i][j]) << " ";
-		}
-		cout << endl;
-	}
+	
+	vector<int> distToX = solve(N, X, adjToX);
+	vector<int> distFromX = solve(N, X, adjFromX);
+	
+	for(int i=1;i<=N;i++)
+		answer = max(answer, distToX[i] + distFromX[i]);
+	
+	cout << answer << endl;
 
 	return 0;
 }
